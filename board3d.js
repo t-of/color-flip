@@ -166,21 +166,20 @@ export function createBoard3D(el, { front, back, onCell, isHot, area }) {
     aspect = w / h;
     cam.aspect = aspect;
     cam.updateProjectionMatrix();
-    placeCamera(0);
+    placeCamera();
   }
   // 視点。ドラッグで回す（yaw: 横の回り込み、tilt: 見下ろす角。大きいほど真上に近い）
   let yaw = 0, tilt = 1.0;
   const corners = [-1, 1].flatMap((sx) => [-1, 1].map((sz) => new THREE.Vector3(sx * 2 * PX + sx * 0.4, 0.3, sz * 2 * PZ + sz * 0.55)));
-  function placeCamera(t) {
+  function placeCamera() {
     const w = el.clientWidth, h = el.clientHeight;
     // 盤を収める範囲（area の矩形、NDC）。UI に隠れない所の真ん中に盤が来るよう、投影をずらす
     const r = area && area();
     let cy = 0, hx = 1, hy = 1;
     if (r && r.height > 40) { cy = 1 - (r.top + r.bottom) / h; hx = r.width / w; hy = r.height / h; }
     cam.setViewOffset(w, h, 0, (cy * h) / 2, w, h);
-    const a = yaw + (reduce ? 0 : Math.sin(t / 2600) * 0.08);
     for (let d = 4; d < 30; d += 0.15) {
-      cam.position.set(Math.sin(a) * Math.cos(tilt) * d, Math.sin(tilt) * d, Math.cos(a) * Math.cos(tilt) * d);
+      cam.position.set(Math.sin(yaw) * Math.cos(tilt) * d, Math.sin(tilt) * d, Math.cos(yaw) * Math.cos(tilt) * d);
       cam.lookAt(0, 0, 0);
       cam.updateMatrixWorld();
       if (corners.every((v) => { const q = v.clone().project(cam); return Math.abs(q.x) < 0.97 * hx && Math.abs(q.y - cy) < 0.97 * hy; })) break;
@@ -210,8 +209,7 @@ export function createBoard3D(el, { front, back, onCell, isHot, area }) {
       const c = cards[k];
       if (c && !c.busy) c.mesh.position.y = REST + (d.hot && !reduce ? 0.06 + 0.05 * s : 0);
     });
-    placeCamera(now);
-    sun.position.x = -2.5 + (reduce ? 0 : Math.sin(now / 3300) * 0.8);
+    placeCamera();
     renderer.render(scene, cam);
   }
   requestAnimationFrame(frame);
