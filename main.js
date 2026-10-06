@@ -53,11 +53,30 @@ function shuffle(a) {
 function say(m) { G.log = m; render(); }
 
 // ---- 画面 ----
-function colorStyle(cols) {
-  return cols.length === 1 ? COL[cols[0]] : `linear-gradient(135deg, ${COL[cols[0]]} 50%, ${COL[cols[1]]} 50%)`;
+// カードは geo ふうの幾何学（○△□・四分円だけ）。色ごとに図形が決まっている: 赤○ 青□ 黄△ 緑四分円
+const INK = '#16182B', CREAM = '#F4EEE1';
+const DARK = ['#B82B27', '#2548C0', '#D99A1E', '#16825A'];
+const SHAPE_FILL = [CREAM, CREAM, INK, CREAM];
+const DOTS = Array.from({ length: 35 }, (_, i) => `<circle cx="${63 + (i % 5) * 126}" cy="${70 + Math.floor(i / 5) * 123}" r="11" fill="${CREAM}" opacity=".18"/>`).join('');
+function shape(k, x, y, s, fill) {
+  const h = s / 2;
+  if (k === 0) return `<circle cx="${x}" cy="${y}" r="${h}" fill="${fill}"/>`;
+  if (k === 1) return `<rect x="${x - h}" y="${y - h}" width="${s}" height="${s}" fill="${fill}"/>`;
+  if (k === 2) return `<path d="M${x} ${y - h}L${x + h} ${y + h}H${x - h}z" fill="${fill}"/>`;
+  return `<path d="M${x - h} ${y + h}V${y - h}A${s} ${s} 0 0 1 ${x + h} ${y + h}z" fill="${fill}"/>`;
 }
-function cardHtml(card, extra = '') {
-  return `<span class="face ${extra}" style="background:${colorStyle(card.c)}">${card.c.map((c) => CN[c]).join('')}</span>`;
+const svg = (body) => `<svg viewBox="0 0 630 880" preserveAspectRatio="none" aria-hidden="true">${body}</svg>`;
+function cardHtml(card) {
+  const [a, b] = card.c;
+  const body = b == null
+    ? `<rect width="630" height="880" fill="${COL[a]}"/><path d="M630 0V400A400 400 0 0 1 230 0z" fill="${DARK[a]}"/>${DOTS}${shape(a, 315, 440, 330, SHAPE_FILL[a])}${shape((a + 1) % 4, 130, 735, 90, INK)}`
+    : `<rect width="630" height="880" fill="${COL[b]}"/><path d="M0 0H630L0 880z" fill="${COL[a]}"/><path d="M630 880H230A400 400 0 0 1 630 480z" fill="${DARK[b]}"/>${DOTS}${shape(a, 195, 250, 220, SHAPE_FILL[a])}${shape(b, 435, 630, 220, SHAPE_FILL[b])}`;
+  return `<span class="face" role="img" aria-label="${card.c.map((c) => CN[c]).join('')}">${svg(body)}</span>`;
+}
+// 裏向き。置いた本人（cols あり）だけ、隅に色の図形が見える
+function backHtml(cols) {
+  const mine = (cols || []).map((c, i) => shape(c, 110 + i * 120, 790, 80, COL[c])).join('');
+  return `<span class="face">${svg(`<rect width="630" height="880" fill="${INK}"/><path d="M630 880V500A380 380 0 0 0 250 880z" fill="#262A45"/>${DOTS}${shape(0, 315, 360, 120, '#F2B632')}${shape(2, 315, 540, 110, '#E4573D')}${shape(1, 315, 660, 70, CREAM)}${mine}`)}</span>`;
 }
 function render() {
   let h = '';
@@ -77,7 +96,7 @@ function render() {
       else {
         cls += ' down';
         if (G.mode === 'flip') cls += ' hot';
-        inner = c.owner === 0 ? `<span class="mine">${c.card.c.map((x) => `<i style="background:${COL[x]}"></i>`).join('')}</span>` : '?';
+        inner = backHtml(c.owner === 0 ? c.card.c : null);
       }
       return `<button class="${cls}" data-cell="${k}">${inner}</button>`;
     }).join('') + `</div>`;

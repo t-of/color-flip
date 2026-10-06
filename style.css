@@ -1,8 +1,8 @@
 :root {
-  --bg: #14161f;
-  --fg: #eceef3;
+  --bg: #16182B;
+  --fg: #F4EEE1;
   --muted: #9aa0ab;
-  --accent: #ffd35c;
+  --accent: #F2B632;
 }
 
 * { box-sizing: border-box; }
@@ -64,13 +64,12 @@ button { font: inherit; color: inherit; }
 .pl.cur { border-color: var(--accent); }
 .pl.dead { opacity: .35; }
 .pl em { color: #ff7a59; font-style: normal; font-weight: bold; }
-.board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: min(100%, 52dvh, 420px); align-self: center; }
-.cell { aspect-ratio: 1; padding: 0; border-radius: 6px; border: 1px dashed rgba(255,255,255,.18); background: transparent; display: grid; place-items: center; color: var(--muted); font-size: 18px; position: relative; overflow: hidden; }
-.cell.down { border: 1px solid rgba(255,255,255,.25); background: #2a2e3d; }
+.board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: min(100%, 420px, calc((50dvh - 16px) * 0.716 + 16px)); align-self: center; }
+.cell { aspect-ratio: 63 / 88; padding: 0; border-radius: 4px; border: 1px solid #2e3252; background: transparent; display: block; position: relative; overflow: hidden; }
+.cell.down { border: 0; }
 .cell.hot { outline: 2px solid var(--accent); }
-.face { display: grid; place-items: center; width: 100%; height: 100%; color: #000; font-weight: bold; font-size: 13px; letter-spacing: 2px; }
-.mine { position: absolute; left: 3px; bottom: 3px; display: flex; gap: 2px; }
-.mine i { width: 8px; height: 8px; border-radius: 50%; }
+.face { display: block; width: 100%; height: 100%; }
+.face svg { display: block; width: 100%; height: 100%; }
 .log { min-height: 2.6em; text-align: center; font-size: 14px; }
 .prompt { background: rgba(255,255,255,.08); border-radius: 10px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .prompt p { width: 100%; margin: 0; text-align: center; font-size: 14px; }
@@ -78,8 +77,8 @@ button { font: inherit; color: inherit; }
 .btn.on { background: var(--accent); color: #000; }
 .btn:disabled, .chip:disabled { opacity: .35; }
 .acts { display: flex; gap: 8px; justify-content: center; }
-.hand { display: flex; gap: 6px; justify-content: center; min-height: 56px; }
-.card { width: 50px; height: 56px; padding: 0; border: 2px solid transparent; border-radius: 6px; background: none; overflow: hidden; }
+.hand { display: flex; gap: 6px; justify-content: center; min-height: 70px; }
+.card { width: 50px; aspect-ratio: 63 / 88; padding: 0; border: 2px solid transparent; border-radius: 5px; background: none; overflow: hidden; }
 .card.sel { border-color: var(--accent); transform: translateY(-4px); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .chip { display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); border-radius: 8px; padding: 4px 8px; min-height: 44px; max-width: 48%; text-align: left; }
