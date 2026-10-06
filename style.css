@@ -1,0 +1,86 @@
+:root {
+  --bg: #14161f;
+  --fg: #eceef3;
+  --muted: #9aa0ab;
+  --accent: #ffd35c;
+}
+
+* { box-sizing: border-box; }
+
+/* Safari 26 の上下バーの色は html の背景から取られる。body と同じ色にしておく */
+html { background-color: var(--bg); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* 画面の端に置くものはセーフエリアの分だけ内側に。高さは 100vh ではなく 100dvh */
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+}
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bar__title { margin: 0; font-size: 18px; }
+.bar__actions { display: flex; gap: 8px; }
+.pill {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+  touch-action: manipulation;   /* ダブルタップ拡大を止める */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.credit { text-align: center; font-size: 12px; color: var(--muted); }
+.credit a { color: inherit; }
+
+/* 全画面のオーバーレイは opacity ではなく display: none で隠す */
+
+.intro { text-align: center; color: var(--muted); font-size: 14px; }
+.intro h2 { color: var(--fg); margin: 8px 0; }
+.info { text-align: center; font-size: 12px; color: var(--muted); }
+.players { display: flex; gap: 4px; }
+.pl { flex: 1; min-width: 0; padding: 4px; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; font-size: 11px; display: flex; flex-direction: column; text-align: center; }
+.pl.cur { border-color: var(--accent); }
+.pl.dead { opacity: .35; }
+.pl em { color: #ff7a59; font-style: normal; font-weight: bold; }
+.board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: min(100%, 52dvh, 420px); align-self: center; }
+.cell { aspect-ratio: 1; padding: 0; border-radius: 6px; border: 1px dashed rgba(255,255,255,.18); background: transparent; display: grid; place-items: center; color: var(--muted); font-size: 18px; position: relative; overflow: hidden; }
+.cell.down { border: 1px solid rgba(255,255,255,.25); background: #2a2e3d; }
+.cell.hot { outline: 2px solid var(--accent); }
+.face { display: grid; place-items: center; width: 100%; height: 100%; color: #000; font-weight: bold; font-size: 13px; letter-spacing: 2px; }
+.mine { position: absolute; left: 3px; bottom: 3px; display: flex; gap: 2px; }
+.mine i { width: 8px; height: 8px; border-radius: 50%; }
+.log { min-height: 2.6em; text-align: center; font-size: 14px; }
+.prompt { background: rgba(255,255,255,.08); border-radius: 10px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.prompt p { width: 100%; margin: 0; text-align: center; font-size: 14px; }
+.btn { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); border-radius: 10px; min-height: 44px; padding: 0 16px; cursor: pointer; }
+.btn.on { background: var(--accent); color: #000; }
+.btn:disabled, .chip:disabled { opacity: .35; }
+.acts { display: flex; gap: 8px; justify-content: center; }
+.hand { display: flex; gap: 6px; justify-content: center; min-height: 56px; }
+.card { width: 50px; height: 56px; padding: 0; border: 2px solid transparent; border-radius: 6px; background: none; overflow: hidden; }
+.card.sel { border-color: var(--accent); transform: translateY(-4px); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip { display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); border-radius: 8px; padding: 4px 8px; min-height: 44px; max-width: 48%; text-align: left; }
+.chip small { font-size: 10px; color: var(--muted); }
