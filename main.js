@@ -1,4 +1,4 @@
-'use strict';
+import { createBoard3D } from './board3d.js';
 
 // localStorage はほかのアプリと共有される（同じ t-of.github.io のため）。
 // キーは必ず 'color-flip.' で始める。
@@ -93,17 +93,7 @@ function render() {
     h += `<div class="players">` + P.map((p) => `<div class="pl${p === cur ? ' cur' : ''}${p.alive ? '' : ' dead'}">
       <b>${p.name}</b><span>点${p.score} ♥${p.hp}</span>
       <span>${G.bomb && G.bomb.holder === p.i ? `<em>爆${G.bomb.count}</em> ` : ''}札${p.hand.length} 勝${G.wins[p.i]}${p.skip ? ' 休' : ''}</span></div>`).join('') + `</div>`;
-    h += `<div class="board">` + G.board.map((c, k) => {
-      let cls = 'cell', inner = '';
-      if (!c) { cls += ' empty'; if (G.mode === 'place' && G.sel != null) cls += ' hot'; }
-      else if (c.up) inner = cardHtml(c.card);
-      else {
-        cls += ' down';
-        if (G.sel == null && G.wait && G.wait.kind === 'act' && !G.t.extra) cls += ' hot';
-        inner = backHtml(c.owner === 0 ? c.card.c : null);
-      }
-      return `<button class="${cls}" data-cell="${k}">${inner}</button>`;
-    }).join('') + `</div>`;
+    h += `<div id="boardSlot"></div>`;
   }
   h += `<div class="log">${G.log || '&nbsp;'}</div>`;
   if (G.ui) {
@@ -122,7 +112,22 @@ function render() {
     </div>`;
   }
   $('stage').innerHTML = h;
+  // 盤は一度作った canvas を置き続ける（innerHTML で消えないように、置き場だけ差し替える）
+  if (P) {
+    $('boardSlot').replaceWith(boardEl);
+    board3d.sync(G.board, G.fx);
+  }
 }
+
+// 盤の 3D。押せるマスの条件は、これまでの .hot と同じ
+const boardEl = document.createElement('div');
+boardEl.className = 'board3d';
+const isHot = (k) => {
+  const c = G.board && G.board[k];
+  if (!c) return G.mode === 'place' && G.sel != null;
+  return !c.up && G.sel == null && G.wait && G.wait.kind === 'act' && !G.t.extra;
+};
+const board3d = createBoard3D(boardEl, { front: (card) => cardHtml(card), back: (cols) => backHtml(cols), onCell: cellTap, isHot });
 
 // 選ぶ（ボタンの番号を返す）。-1 はキャンセル相当を呼び出し側で作る
 function choose(title, labels) {
@@ -136,7 +141,7 @@ function waitAct() {
 function give(v) { const w = G.wait; G.wait = null; if (w) w.res(v); }
 
 $('stage').addEventListener('click', (e) => {
-  const el = e.target.closest('[data-a],[data-h],[data-cell],[data-chip],[data-opt]');
+  const el = e.target.closest('[data-a],[data-h],[data-chip],[data-opt]');
   const w = G.wait;
   if (!el || !w) return;
   const d = el.dataset;
@@ -150,13 +155,17 @@ $('stage').addEventListener('click', (e) => {
     G.mode = G.mode === d.a ? null : d.a; if (G.mode !== 'place') G.sel = null; render(); return;
   }
   if (d.h != null) { G.mode = 'place'; G.sel = G.sel === Number(d.h) ? null : Number(d.h); render(); return; }
-  if (d.cell != null) {
-    const k = Number(d.cell), c = G.board[k];
-    // 手札を選んでいれば空きマスに置く。何も選んでいなければ裏向きをめくる
-    if (G.sel != null && !c) give({ t: 'place', ci: G.sel, cell: k });
-    else if (G.sel == null && c && !c.up && can.flip && !G.t.extra) give({ t: 'flip', cell: k });
-  }
 });
+
+// 盤のタップ（3D の canvas から来る）
+function cellTap(k) {
+  const w = G.wait;
+  if (!w || w.kind !== 'act') return;
+  const c = G.board[k], can = canDo(G.players[0]);
+  // 手札を選んでいれば空きマスに置く。何も選んでいなければ裏向きをめくる
+  if (G.sel != null && !c) give({ t: 'place', ci: G.sel, cell: k });
+  else if (G.sel == null && c && !c.up && can.flip && !G.t.extra) give({ t: 'flip', cell: k });
+}
 
 // ---- ルール ----
 function neighbors(k) {
@@ -229,6 +238,7 @@ async function flip(p, k) {
   const cell = G.board[k];
   cell.up = true;
   const r = judge(k, p);
+  G.fx = { k, r };   // 盤の 3D が、めくった結果の動きを選ぶのに使う
   const who = p.name;
   if (r === 'none') { say(`${who}がめくった。隣に表向きがなく、何も起きない`); return; }
   if (r === 'ng') {

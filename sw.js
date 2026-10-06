@@ -9,7 +9,7 @@
 // ブラウザの HTTP キャッシュを通さない（install は reload、fetch は no-cache）。古い main.js と新しい index.html が混ざって動かなくなるのを防ぐ。
 
 const PREFIX = 'color-flip-';
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `${PREFIX}${VERSION}`;
 const FONT_CACHE = `${PREFIX}fonts`;
 
@@ -18,6 +18,7 @@ const SHELL = [
   './index.html',
   './style.css',
   './main.js',
+  './board3d.js',
   './manifest.webmanifest',
   './webapp-kit/webapp-kit.css',
   './webapp-kit/webapp-kit.js',
@@ -45,7 +46,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.origin === location.origin) {
     e.respondWith(networkFirst(req));
-  } else if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+  } else if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'cdn.jsdelivr.net') { // three.js も版が固定
     e.respondWith(cacheFirst(req, FONT_CACHE));
   }
 });
