@@ -99,7 +99,7 @@ function render() {
       else if (c.up) inner = cardHtml(c.card);
       else {
         cls += ' down';
-        if (G.mode === 'flip') cls += ' hot';
+        if (G.sel == null && G.wait && G.wait.kind === 'act' && !G.t.extra) cls += ' hot';
         inner = backHtml(c.owner === 0 ? c.card.c : null);
       }
       return `<button class="${cls}" data-cell="${k}">${inner}</button>`;
@@ -131,8 +131,7 @@ function choose(title, labels) {
   return new Promise((res) => { G.wait = { kind: 'opt', res: (v) => { G.ui = null; res(v); } }; });
 }
 function waitAct() {
-  render();
-  return new Promise((res) => { G.wait = { kind: 'act', res }; });
+  return new Promise((res) => { G.wait = { kind: 'act', res }; render(); });
 }
 function give(v) { const w = G.wait; G.wait = null; if (w) w.res(v); }
 
@@ -153,8 +152,9 @@ $('stage').addEventListener('click', (e) => {
   if (d.h != null) { G.mode = 'place'; G.sel = G.sel === Number(d.h) ? null : Number(d.h); render(); return; }
   if (d.cell != null) {
     const k = Number(d.cell), c = G.board[k];
-    if (G.mode === 'place' && G.sel != null && !c) give({ t: 'place', ci: G.sel, cell: k });
-    else if (G.mode === 'flip' && c && !c.up) give({ t: 'flip', cell: k });
+    // 手札を選んでいれば空きマスに置く。何も選んでいなければ裏向きをめくる
+    if (G.sel != null && !c) give({ t: 'place', ci: G.sel, cell: k });
+    else if (G.sel == null && c && !c.up && can.flip && !G.t.extra) give({ t: 'flip', cell: k });
   }
 });
 
