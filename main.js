@@ -93,7 +93,7 @@ function render() {
     h += `<div class="players">` + P.map((p) => `<div class="pl${p === cur ? ' cur' : ''}${p.alive ? '' : ' dead'}">
       <b>${p.name}</b><span>点${p.score} ♥${p.hp}</span>
       <span>${G.bomb && G.bomb.holder === p.i ? `<em>爆${G.bomb.count}</em> ` : ''}札${p.hand.length} 勝${G.wins[p.i]}${p.skip ? ' 休' : ''}</span></div>`).join('') + `</div>`;
-    h += `<div id="boardSlot"></div>`;
+    h += `<div class="area" id="boardArea"></div>`;
   }
   h += `<div class="log">${G.log || '&nbsp;'}</div>`;
   if (G.ui) {
@@ -112,22 +112,20 @@ function render() {
     </div>`;
   }
   $('stage').innerHTML = h;
-  // 盤は一度作った canvas を置き続ける（innerHTML で消えないように、置き場だけ差し替える）
-  if (P) {
-    $('boardSlot').replaceWith(boardEl);
-    board3d.sync(G.board, G.fx);
-  }
+  // 盤は画面全体の背景（body 直下）。UI の空き（#boardArea）に収まるようカメラが合わせる
+  if (P) board3d.sync(G.board, G.fx);
 }
 
 // 盤の 3D。押せるマスの条件は、これまでの .hot と同じ
 const boardEl = document.createElement('div');
 boardEl.className = 'board3d';
+document.body.prepend(boardEl);
 const isHot = (k) => {
   const c = G.board && G.board[k];
   if (!c) return G.mode === 'place' && G.sel != null;
   return !c.up && G.sel == null && G.wait && G.wait.kind === 'act' && !G.t.extra;
 };
-const board3d = createBoard3D(boardEl, { front: (card) => cardHtml(card), back: (cols) => backHtml(cols), onCell: cellTap, isHot });
+const board3d = createBoard3D(boardEl, { front: (card) => cardHtml(card), back: (cols) => backHtml(cols), onCell: cellTap, isHot, area: () => $('boardArea')?.getBoundingClientRect() });
 
 // 選ぶ（ボタンの番号を返す）。-1 はキャンセル相当を呼び出し側で作る
 function choose(title, labels) {

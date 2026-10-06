@@ -28,7 +28,7 @@ function texture(key, html) {
   return t;
 }
 
-export function createBoard3D(el, { front, back, onCell, isHot }) {
+export function createBoard3D(el, { front, back, onCell, isHot, area }) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
@@ -168,15 +168,22 @@ export function createBoard3D(el, { front, back, onCell, isHot }) {
     cam.updateProjectionMatrix();
     placeCamera(0);
   }
-  const tilt = 1.0;   // 見下ろす角（ラジアン。大きいほど真上に近い）
+  // 視点。ドラッグで回す（yaw: 横の回り込み、tilt: 見下ろす角。大きいほど真上に近い）
+  let yaw = 0, tilt = 1.0;
   const corners = [-1, 1].flatMap((sx) => [-1, 1].map((sz) => new THREE.Vector3(sx * 2 * PX + sx * 0.4, 0.3, sz * 2 * PZ + sz * 0.55)));
   function placeCamera(t) {
-    const sway = reduce ? 0 : Math.sin(t / 2600) * 0.22;
+    const w = el.clientWidth, h = el.clientHeight;
+    // 盤を収める範囲（area の矩形、NDC）。UI に隠れない所の真ん中に盤が来るよう、投影をずらす
+    const r = area && area();
+    let cy = 0, hx = 1, hy = 1;
+    if (r && r.height > 40) { cy = 1 - (r.top + r.bottom) / h; hx = r.width / w; hy = r.height / h; }
+    cam.setViewOffset(w, h, 0, (cy * h) / 2, w, h);
+    const a = yaw + (reduce ? 0 : Math.sin(t / 2600) * 0.08);
     for (let d = 4; d < 30; d += 0.15) {
-      cam.position.set(sway * d * 0.4, Math.sin(tilt) * d, Math.cos(tilt) * d);
-      cam.lookAt(0, 0, 0.1);
+      cam.position.set(Math.sin(a) * Math.cos(tilt) * d, Math.sin(tilt) * d, Math.cos(a) * Math.cos(tilt) * d);
+      cam.lookAt(0, 0, 0);
       cam.updateMatrixWorld();
-      if (corners.every((v) => { const q = v.clone().project(cam); return Math.abs(q.x) < 0.97 && Math.abs(q.y) < 0.97; })) break;
+      if (corners.every((v) => { const q = v.clone().project(cam); return Math.abs(q.x) < 0.97 * hx && Math.abs(q.y - cy) < 0.97 * hy; })) break;
     }
   }
   new ResizeObserver(resize).observe(el);
@@ -209,10 +216,29 @@ export function createBoard3D(el, { front, back, onCell, isHot }) {
   }
   requestAnimationFrame(frame);
 
+  // ドラッグで視点を回す。少しでも動かしたら、そのあとの click はマスのタップにしない
+  const cv = renderer.domElement;
+  cv.style.touchAction = 'none';
+  cv.style.cursor = 'grab';
+  let drag = null, moved = false;
+  cv.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, yaw, tilt }; moved = false; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!moved && Math.hypot(dx, dy) < 6) return;
+    moved = true;
+    yaw = drag.yaw - dx * 0.008;
+    tilt = Math.min(1.5, Math.max(0.35, drag.tilt + dy * 0.006));
+  });
+  const up = () => { drag = null; };
+  cv.addEventListener('pointerup', up);
+  cv.addEventListener('pointercancel', up);
+
   // タップしたマスの番号
   const ray = new THREE.Raycaster(), pt = new THREE.Vector2();
-  renderer.domElement.addEventListener('click', (e) => {
-    const r = renderer.domElement.getBoundingClientRect();
+  cv.addEventListener('click', (e) => {
+    if (moved) { moved = false; return; }
+    const r = cv.getBoundingClientRect();
     pt.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(pt, cam);
     const hit = ray.intersectObjects(slots)[0];

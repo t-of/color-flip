@@ -64,9 +64,15 @@ button { font: inherit; color: inherit; }
 .pl.cur { border-color: var(--accent); }
 .pl.dead { opacity: .35; }
 .pl em { color: #ff7a59; font-style: normal; font-weight: bold; }
-.board3d { width: min(100%, 420px, calc((50dvh - 16px) * 0.93 + 16px)); aspect-ratio: 93 / 100; align-self: center; border-radius: 10px; overflow: hidden; }
+.board3d { position: fixed; inset: 0; z-index: 0; }
+/* 盤の上に UI を重ねる。押せる物以外はタップを盤へ通す */
+.app { position: relative; z-index: 1; pointer-events: none; }
+.app button, .app a, .pl, .prompt { pointer-events: auto; }
+.area { flex: 1; min-height: 45dvh; }
+.pl { background: rgba(22, 24, 43, .75); }
+.info, .log, .intro, .credit { text-shadow: 0 1px 3px #000; }
 .log { min-height: 2.6em; text-align: center; font-size: 14px; }
-.prompt { background: rgba(255,255,255,.08); border-radius: 10px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.prompt { background: rgba(40, 43, 70, .9); border-radius: 10px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .prompt p { width: 100%; margin: 0; text-align: center; font-size: 14px; }
 .btn { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); border-radius: 10px; min-height: 44px; padding: 0 16px; cursor: pointer; }
 .btn.on { background: var(--accent); color: #000; }
