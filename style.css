@@ -83,3 +83,19 @@ button { font: inherit; color: inherit; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .chip { display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); border-radius: 8px; padding: 4px 8px; min-height: 44px; max-width: 48%; text-align: left; }
 .chip small { font-size: 10px; color: var(--muted); }
+
+/* 遊び方 */
+.how { width: min(92vw, 480px); max-height: 86dvh; padding: 0; border: 1px solid rgba(255,255,255,.2); border-radius: 12px; background: var(--bg); color: var(--fg); }
+.how::backdrop { background: rgba(0,0,0,.6); }
+.how__body { padding: 16px; font-size: 14px; line-height: 1.7; overflow-y: auto; max-height: 86dvh; }
+.how h2 { margin: 0 0 8px; }
+.how h3 { margin: 16px 0 4px; font-size: 14px; color: var(--accent); }
+.how p, .how ul { margin: 4px 0; }
+.how ul { padding-left: 1.2em; }
+.how__row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 8px 0; }
+.how__row#howEx { display: grid; grid-template-columns: repeat(3, 48px); justify-content: center; }
+.mini { display: block; width: 48px; aspect-ratio: 63 / 88; border-radius: 4px; overflow: hidden; }
+.how__row#howEx .mini:empty { border: 1px dashed #2e3252; }
+.how__mid { outline: 2px solid var(--accent); }
+.how__cap { text-align: center; color: var(--muted); font-size: 12px; }
+.how__close { display: block; margin: 16px auto 0; }

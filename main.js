@@ -44,7 +44,11 @@ const WIN_SCORE = 4;
 
 let G = { players: null, wait: null, t: {}, mode: null, sel: null, ui: null, log: '' };
 const $ = (id) => document.getElementById(id);
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// 遊び方を開いている間は、CPU の手番も進めない
+const sleep = async (ms) => {
+  await new Promise((r) => setTimeout(r, ms));
+  while ($('how').open) await new Promise((r) => $('how').addEventListener('close', r, { once: true }));
+};
 const rnd = (a) => a[Math.floor(Math.random() * a.length)];
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -449,4 +453,12 @@ async function playGame() {
   await choose(`ゲーム終了。優勝: ${champs}（${m}勝）`, ['もう一度']);
   playGame();
 }
+// ---- 遊び方 ----
+const mini = (cols) => `<span class="mini">${cardHtml({ c: cols })}</span>`;
+$('howCards').innerHTML = [[0], [1], [2], [3], [0, 3]].map(mini).join('');
+$('howEx').innerHTML = [null, [1], null, [0, 3], 'mid', [3], null, [2], null]
+  .map((x) => (x === 'mid' ? `<span class="mini how__mid">${backHtml([0])}</span>` : x ? mini(x) : '<span class="mini"></span>')).join('');
+$('howChips').innerHTML = Object.values(CHIPS).map(([n, t]) => `<li><b>${n}</b> ${t}</li>`).join('');
+$('howBtn').addEventListener('click', () => $('how').showModal());
+$('howClose').addEventListener('click', () => $('how').close());
 playGame();

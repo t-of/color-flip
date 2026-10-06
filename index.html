@@ -35,6 +35,7 @@
     <header class="bar">
       <h1 class="bar__title">color-flip</h1>
       <div class="bar__actions">
+        <button class="pill" id="howBtn">遊び方</button>
         <button class="pill" data-wak="install" hidden>アプリにする</button>
         <button class="pill" data-wak="share">共有</button>
       </div>
@@ -48,6 +49,45 @@
       <a href="/">T.OF...</a> のアプリ ・ <a href="https://t-of.github.io/contact/">問い合わせ</a>
     </footer>
   </main>
+
+  <dialog id="how" class="how">
+    <div class="how__body">
+      <h2>遊び方</h2>
+      <h3>目的</h3>
+      <p>3 ラウンド遊び、ラウンドの勝ちが一番多い人の優勝。ラウンドは「先に 4 点を取った人」か「最後まで体力が残った 1 人」が勝ち。</p>
+      <h3>準備</h3>
+      <p>カードは 30 枚（4 色 × 6 枚、2 色カード 6 枚）。各自 3 枚を持ち、得点 0・体力 2 で始める。場の真ん中に 1 枚が表向きで置かれる。</p>
+      <h3>色と図形</h3>
+      <p>赤は○、青は□、黄は△、緑は四分円。2 色カードはどちらの色としても数える。</p>
+      <div class="how__row" id="howCards"></div>
+      <h3>手番</h3>
+      <p>特殊チップを 1 枚まで使ってから、次のどれか 1 つをする。</p>
+      <ul>
+        <li><b>引く</b> 山札から 1 枚（手札は 5 枚まで）</li>
+        <li><b>置く</b> 手札 1 枚を空きマスに裏向きで置く</li>
+        <li><b>めくる</b> 裏向きを 1 枚表にして判定する</li>
+      </ul>
+      <h3>判定</h3>
+      <p>めくったカードを、上下左右の表向きのカードと比べる（斜めは数えない）。</p>
+      <ul>
+        <li>1 色でも同じ → 成功。得点 +1、特殊チップを 1 枚もらう</li>
+        <li>同じ色がない → 失敗。体力 −1（0 で脱落）</li>
+        <li>隣に表向きがない → 何も起きない</li>
+      </ul>
+      <p>誰がめくっても判定は同じ。</p>
+      <div class="how__row" id="howEx"></div>
+      <p class="how__cap">真ん中の赤をめくると、左の赤緑と赤が同じなので成功。</p>
+      <h3>裏向きのカード</h3>
+      <p>色を知っているのは置いた本人だけ。自分のカードは隅に小さく色が見える。</p>
+      <h3>爆弾</h3>
+      <p>最初に成功した人が、好きな人に爆弾を渡す。持ち主は自分の番の終わりにカウントが 1 減る（2 人は 4、3 人以上は 3 から）。0 になると体力 −1 で、爆弾は次の人へ。持ち主がめくりに成功したときは、好きな人に渡せる。</p>
+      <h3>特殊チップ</h3>
+      <ul id="howChips"></ul>
+      <h3>コツ</h3>
+      <p>合う場所に置けば、次の番に点が取れる。でも置いた場所は皆に見えるので、先にめくられて横取りされるかもしれない。わざと合わないカードを置いて、相手にめくらせるのも手。</p>
+      <button class="btn how__close" id="howClose">閉じる</button>
+    </div>
+  </dialog>
 
   <script src="./webapp-kit/webapp-kit.js"></script>
   <script src="./main.js"></script>
